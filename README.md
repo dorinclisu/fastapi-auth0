@@ -27,6 +27,13 @@ def get_secure(user: Auth0User = Security(auth.get_user, scopes=['read:blabla'])
     return {"message": f"{user}"}
 ```
 
+Example user responses:
+```Python
+id='Art2l2uCeCQk5zDVbZzNZmQkLJXLd9Uy@clients' permissions=['read:blabla'] email=None"}              # user is M2M app
+id='auth0|5fe72b8eb2ac50006f725451' permissions=['read:blabla'] email='some.user@outlook.com"}      # user signed up using auth0 database
+id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='other.user@gmail.com"}  # user signed up using google
+```
+
 # Video tutorial
 The settings on the auth0 tenant dashboard look pretty daunting at first, and it can get pretty complex to configure everything.
 This is why I plan on making a video tutorial with all the steps required from 0 to having a fully working social provider.
