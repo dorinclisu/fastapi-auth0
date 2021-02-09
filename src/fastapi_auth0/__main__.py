@@ -5,7 +5,7 @@ from typing import Optional, Dict, List
 
 from fastapi import HTTPException, Depends, Security, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.security import OAuth2, OpenIdConnect, OAuth2PasswordBearer
+from fastapi.security import OAuth2, OAuth2PasswordBearer, OpenIdConnect
 from fastapi.openapi.models import OAuthFlows
 from pydantic import BaseModel, Field, ValidationError
 from jose import jwt
@@ -30,7 +30,7 @@ security_responses: Dict = {**unauthenticated_response, **unauthorized_response}
 
 class Auth0User(BaseModel):
     id: str = Field(..., alias='sub')
-    permissions: List[str] = Field([], alias='scope')
+    permissions: Optional[List[str]]
     email: Optional[str] = Field(None, alias=f'{auth0_rule_namespace}/email')
 
 
@@ -137,24 +137,21 @@ class Auth0:
             logging.error(f'Handled exception decoding token: "{e}"')
             raise Auth0UnauthenticatedError(detail='Error decoding token')
 
-        token_scope_str: str = payload.get('scope', '')
-        token_scopes: List[str] = []
+        if self.scope_auto_error:
+            token_scope_str: str = payload.get('scope', '')
 
-        if isinstance(token_scope_str, str):
-            token_scopes = token_scope_str.split()
+            if isinstance(token_scope_str, str):
+                token_scopes = token_scope_str.split()
 
-            if self.scope_auto_error:
                 for scope in security_scopes.scopes:
                     if scope not in token_scopes:
-                        raise Auth0UnauthorizedError(detail=f'Missing "{scope}" permission',
+                        raise Auth0UnauthorizedError(detail=f'Missing "{scope}" scope',
                             headers={'WWW-Authenticate': f'Bearer scope="{security_scopes.scope_str}"'})
-        else:
-            # This is an unlikely case but handle it just to be safe (perhaps auth0 will change the scope format)
-            if self.scope_auto_error:
+            else:
+                # This is an unlikely case but handle it just to be safe (perhaps auth0 will change the scope format)
                 raise Auth0UnauthorizedError(detail='Token "scope" field must be a string')
 
         try:
-            payload['scope'] = token_scopes
             user = Auth0User(**payload)
 
             if self.email_auto_error and not user.email:
