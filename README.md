@@ -1,13 +1,14 @@
 # Description
-Integrate your FastAPI with auth0.com in a simple and elegant way.
+Integrate your FastAPI with https://auth0.com in a simple and elegant way.
 Get Swagger UI support for the implicit scheme, which means you can sign in with google or any other social provider using just swagger docs! With no additional code!
 
 # Example usage
-First of all, I recommeng reading auth0 docs in order to understand the following concepts:
+First of all, I recommend reading auth0 docs in order to understand the following concepts:
  - API's and audience
  - Applications
  - Grant types
  - Permissions and scopes
+ 
 This library cannot do magic if your auth0 tenant is not configured correctly!
 
 ```Python
