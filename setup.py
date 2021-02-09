@@ -11,5 +11,5 @@ setuptools.setup(
     license='GNU-GPL-V3',
     description='Easy auth0.com integration for FastAPI',
     python_requires='>=3.5',
-    install_requires=['fastapi>=0.60.0', 'python-jose', 'requests'],
+    install_requires=['fastapi>=0.60.0', 'python-jose>=3.2.0', 'requests'],
 )
