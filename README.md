@@ -15,6 +15,9 @@ This library cannot do magic if your auth0 tenant is not configured correctly!
 In order to get email for Auth0User, the API must have "openid profile email" permission and the rule "Add email to access token" must be added with the matching namespace, see [tests](tests/README.md).
 The security is not affected in any way if we don't do this, but we need to if we want to know the user email's address. Otherwise, email field will always be `None`.
 
+### Swagger UI login requirements
+In order to utilize the interactive docs for the implicit flow, the callback url must be registered on the auth0 dashboard. For swagger this url is `{SWAGGER_DOCS_URL}/oauth2-redirect`, so if you are running FastAPI on localhost:8000, that becomes `http://localhost:8000/docs/oauth2-redirect`. Add it to "Allowed Callback URLs" for the application which you intend to login with (the client_id you input for Auth0ImplicitBearer authorization). Unfortunately, it's not possible to logout and login with another user before the token expires. This is a limitation of Swagger UI as the logout button only clears the access token locally, but doesn't call any url.
+
 ```Python
 from fastapi import FastAPI, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
