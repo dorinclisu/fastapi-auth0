@@ -12,8 +12,8 @@ First of all, I recommend reading auth0 docs in order to understand the followin
 This library cannot do magic if your auth0 tenant is not configured correctly!
 
 ### Email field requirements
-In order to get email for Auth0User, the API must have "openid profile email" permission and the rule "Add Permissions in the Access Token" must be added with the matching namespace, see [tests](tests/README.md)
-The security is not affected in any way if we don't do these things, but we might want to do them if we somehow need the user email's address. Otherwise, email field will always be `None`.
+In order to get email for Auth0User, the API must have "openid profile email" permission and the rule "Add email to access token" must be added with the matching namespace, see [tests](tests/README.md).
+The security is not affected in any way if we don't do this, but we need to if we want to know the user email's address. Otherwise, email field will always be `None`.
 
 ```Python
 from fastapi import FastAPI, Depends, Security
