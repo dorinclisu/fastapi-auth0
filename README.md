@@ -1,23 +1,29 @@
 # Description
-Integrate your FastAPI with https://auth0.com in a simple and elegant way.
-Get Swagger UI support for the implicit scheme, which means you can sign in with google or any other social provider using just swagger docs! With no additional code!
+Integrate FastAPI with https://auth0.com in a simple and elegant way.
+Get automatic Swagger UI integration for the implicit scheme (along others), which means that signing in using social providers is only a few clicks away with no additional code.
 
-# Example usage
-First of all, I recommend reading auth0 docs in order to understand the following concepts:
+# Installation
+Latest version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/master.zip`
+Locked version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/x.x.x.zip` (check release tags)
+
+# Requirements
+Reading auth0 docs is recommended in order to understand the following concepts:
  - API's and audience
  - Applications
  - Grant types
  - Permissions and scopes
 
-This library cannot do magic if your auth0 tenant is not configured correctly!
+This library cannot do magic if the auth0 tenant is not configured correctly!
 
 ### Email field requirements
 In order to get email for Auth0User, the API must have "openid profile email" permission and the rule "Add email to access token" must be added with the matching namespace, see [tests](tests/README.md).
 The security is not affected in any way if we don't do this, but we need to if we want to know the user email's address. Otherwise, email field will always be `None`.
 
 ### Swagger UI login requirements
-In order to utilize the interactive docs for the implicit flow, the callback url must be registered on the auth0 dashboard. For swagger this url is `{SWAGGER_DOCS_URL}/oauth2-redirect`, so if you are running FastAPI on localhost:8000, that becomes `http://localhost:8000/docs/oauth2-redirect`. Add it to "Allowed Callback URLs" for the application which you intend to login with (the client_id you input for Auth0ImplicitBearer authorization). Unfortunately, it's not possible to logout and login with another user before the token expires. This is a limitation of Swagger UI as the logout button only clears the access token locally, but doesn't call any url.
+In order to utilize the interactive docs for the implicit flow, the callback url must be registered on the auth0 dashboard. For swagger this url is `{SWAGGER_DOCS_URL}/oauth2-redirect`, so if you are running FastAPI on localhost:8000, that becomes `http://localhost:8000/docs/oauth2-redirect`. Add it to "Allowed Callback URLs" for the application which you intend to login with (the client_id you input for Auth0ImplicitBearer authorization).
+Unfortunately, it's not possible to logout and login with another user before the token expires. This is a limitation of Swagger UI as the logout button only clears the access token locally, but doesn't call any url.
 
+# Example usage
 ```Python
 from fastapi import FastAPI, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
@@ -44,6 +50,3 @@ id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='othe
 # Video tutorial
 The settings on the auth0 tenant dashboard look pretty daunting at first, and it can get pretty complex to configure everything.
 This is why I plan on making a video tutorial with all the steps required from 0 to having a fully working social provider.
-
-# Installation
-`pip install https://github.com/dorinclisu/fastapi-auth0/archive/master.zip`
