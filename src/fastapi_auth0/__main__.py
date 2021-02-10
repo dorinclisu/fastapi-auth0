@@ -23,8 +23,11 @@ class Auth0UnauthorizedError(HTTPException):
     def __init__(self, **kwargs):
         super().__init__(403, **kwargs)
 
-unauthenticated_response: Dict = {401: {'model': Auth0UnauthenticatedError}}
-unauthorized_response: Dict = {403: {'model': Auth0UnauthorizedError}}
+class HTTPAuth0Error(BaseModel):
+    detail: str
+
+unauthenticated_response: Dict = {401: {'model': HTTPAuth0Error}}
+unauthorized_response: Dict = {403: {'model': HTTPAuth0Error}}
 security_responses: Dict = {**unauthenticated_response, **unauthorized_response}
 
 
@@ -155,7 +158,7 @@ class Auth0:
             user = Auth0User(**payload)
 
             if self.email_auto_error and not user.email:
-                raise Auth0UnauthorizedError(detail=f'Missing email claim (M2M app not allowed)')
+                raise Auth0UnauthorizedError(detail=f'Missing email claim (check auth0 rule "Add email to access token")')
 
             return user
 

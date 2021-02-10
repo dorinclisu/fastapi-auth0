@@ -7,8 +7,8 @@ import requests
 from fastapi import FastAPI, Depends, Security
 from fastapi.testclient import TestClient
 
-#from fastapi_auth0 import Auth0, Auth0User
-from src.fastapi_auth0 import Auth0, Auth0User
+#from fastapi_auth0 import Auth0, Auth0User, security_responses
+from src.fastapi_auth0 import Auth0, Auth0User, security_responses
 
 
 auth0_domain = os.getenv('AUTH0_DOMAIN')  # Tenant domain
@@ -38,7 +38,7 @@ def get_public():
 def get_public2():
     return {'message': 'Anonymous user (token is received from swagger ui but not verified)'}
 
-@app.get('/secure', dependencies=[Depends(auth.implicit_scheme)])
+@app.get('/secure', dependencies=[Depends(auth.implicit_scheme)], responses=security_responses)
 def get_secure(user: Auth0User = Security(auth.get_user)):
     return user
 
