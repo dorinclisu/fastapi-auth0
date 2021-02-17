@@ -118,12 +118,6 @@ class Auth0:
                 if self.auto_error:
                     raise jwt.JWTError
 
-        except jwt.JWTError:
-            if self.auto_error:
-                raise Auth0UnauthenticatedError(detail='Malformed token')
-            else:
-                return None
-
         except jwt.ExpiredSignatureError:
             if self.auto_error:
                 raise Auth0UnauthenticatedError(detail='Expired token')
@@ -133,6 +127,12 @@ class Auth0:
         except jwt.JWTClaimsError:
             if self.auto_error:
                 raise Auth0UnauthenticatedError(detail='Invalid token claims (please check issuer and audience)')
+            else:
+                return None
+
+        except jwt.JWTError:
+            if self.auto_error:
+                raise Auth0UnauthenticatedError(detail='Malformed token')
             else:
                 return None
 
