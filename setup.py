@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='fastapi-auth0',
-    version='0.1.0',
+    version='0.1.2',
     author='Dorin Clisu',
     author_email='dorin.clisu@gmail.com',
     packages=setuptools.find_packages('src'),

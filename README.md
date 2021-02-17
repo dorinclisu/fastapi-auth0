@@ -4,7 +4,7 @@ Get automatic Swagger UI integration for the implicit scheme (along others), whi
 
 # Installation
 - Latest version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/master.zip`
-- Locked version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/x.x.x.zip` (check release tags)
+- Locked version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/x.y.z.zip` (check release tags)
 
 # Requirements
 Reading auth0 docs is recommended in order to understand the following concepts:

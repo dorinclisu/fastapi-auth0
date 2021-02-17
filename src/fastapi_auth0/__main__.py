@@ -5,7 +5,7 @@ from typing import Optional, Dict, List
 
 from fastapi import HTTPException, Depends, Security, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.security import OAuth2, OAuth2PasswordBearer, OpenIdConnect
+from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
 from fastapi.openapi.models import OAuthFlows
 from pydantic import BaseModel, Field, ValidationError
 from jose import jwt
@@ -79,10 +79,15 @@ class Auth0:
         self.algorithms = ['RS256']
         self.jwks: Dict = requests.get(f'https://{domain}/.well-known/jwks.json').json()
 
-        self.implicit_scheme = OAuth2ImplicitBearer(authorizationUrl=f'https://{domain}/authorize?audience={api_audience}',
+        self.implicit_scheme = OAuth2ImplicitBearer(
+            authorizationUrl=f'https://{domain}/authorize?audience={api_audience}',
             scopes=scopes,
             scheme_name='Auth0ImplicitBearer')
         self.password_scheme = OAuth2PasswordBearer(tokenUrl=f'https://{domain}/oauth/token', scopes=scopes)
+        self.authcode_scheme = OAuth2AuthorizationCodeBearer(
+            authorizationUrl=f'https://{domain}/authorize?audience={api_audience}',
+            tokenUrl=f'https://{domain}/oauth/token',
+            scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
 
 
