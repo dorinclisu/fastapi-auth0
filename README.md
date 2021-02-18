@@ -40,7 +40,7 @@ def get_secure(user: Auth0User = Security(auth.get_user, scopes=['read:blabla'])
     return {"message": f"{user}"}
 ```
 
-[]('docs/swaggerui.jpg)
+![](docs/swaggerui.jpg)
 
 Example user responses:
 ```Python
@@ -50,4 +50,4 @@ id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='othe
 ```
 
 # Video tutorial
-[](https://youtu.be/cGRdFjgAy9s)
+[https://youtu.be/cGRdFjgAy9s](https://youtu.be/cGRdFjgAy9s)
