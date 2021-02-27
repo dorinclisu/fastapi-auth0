@@ -12,8 +12,8 @@ from fastapi.testclient import TestClient
 from src.fastapi_auth0 import Auth0, Auth0User, security_responses
 
 
-auth0_domain = os.getenv('AUTH0_DOMAIN')  # Tenant domain
-auth0_api_audience = os.getenv('AUTH0_API_AUDIENCE')  # API that serves the applications (fastapi instance)
+auth0_domain = os.getenv('AUTH0_DOMAIN', '')  # Tenant domain
+auth0_api_audience = os.getenv('AUTH0_API_AUDIENCE', '')  # API that serves the applications (fastapi instance)
 auth0_api_audience_wrong = os.getenv('AUTH0_API_AUDIENCE_WRONG')
 
 auth0_expired_token = os.getenv('AUTH0_EXPIRED_TOKEN')

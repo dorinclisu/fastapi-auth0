@@ -4,8 +4,8 @@ from fastapi import FastAPI, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 
 
-auth0_domain = os.getenv('AUTH0_DOMAIN')
-auth0_api_audience = os.getenv('AUTH0_API_AUDIENCE')
+auth0_domain = os.getenv('AUTH0_DOMAIN', '')
+auth0_api_audience = os.getenv('AUTH0_API_AUDIENCE', '')
 
 auth = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, scopes={
     'read:blabla': 'Read BlaBla resource'

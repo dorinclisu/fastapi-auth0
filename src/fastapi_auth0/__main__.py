@@ -8,7 +8,7 @@ from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCreden
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
 from fastapi.openapi.models import OAuthFlows
 from pydantic import BaseModel, Field, ValidationError
-from jose import jwt
+from jose import jwt  # type: ignore
 
 
 
@@ -92,9 +92,9 @@ class Auth0:
 
 
     async def get_user(self,
-            security_scopes: SecurityScopes,
-            creds: HTTPAuthorizationCredentials = Depends(Auth0HTTPBearer())
-        ) -> Optional[Auth0User]:
+        security_scopes: SecurityScopes,
+        creds: HTTPAuthorizationCredentials = Depends(Auth0HTTPBearer())
+    ) -> Optional[Auth0User]:
 
         token = creds.credentials
         payload: Dict = {}
