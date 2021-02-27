@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
+        dependencies: ['fastapi>=0.60.0', 'python-jose>=3.2.0', 'requests']
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 mypy pytest
+        python -m pip install flake8 mypy pytest ${{ matrix.dependencies }}"
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
