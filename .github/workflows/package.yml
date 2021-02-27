@@ -40,5 +40,17 @@ jobs:
     - name: Test with pytest
       run: |
         python -m pytest -v
+      env:
+        AUTH0_DOMAIN:             ${{ secrets.AUTH0_DOMAIN }}
+        AUTH0_API_AUDIENCE:       ${{ secrets.AUTH0_API_AUDIENCE }}
+        AUTH0_API_AUDIENCE_WRONG: ${{ secrets.AUTH0_API_AUDIENCE_WRONG }}
+        AUTH0_EXPIRED_TOKEN:      ${{ secrets.AUTH0_EXPIRED_TOKEN }}
+        AUTH0_M2M_CLIENT_ID:      ${{ secrets.AUTH0_M2M_CLIENT_ID }}
+        AUTH0_M2M_CLIENT_SECRET:  ${{ secrets.AUTH0_M2M_CLIENT_SECRET }}
+        AUTH0_SPA_CLIENT_ID:      ${{ secrets.AUTH0_SPA_CLIENT_ID }}
+        AUTH0_SPA_CLIENT_SECRET:  ${{ secrets.AUTH0_SPA_CLIENT_SECRET }}
+        AUTH0_SPA_USERNAME:       ${{ secrets.AUTH0_SPA_USERNAME }}
+        AUTH0_SPA_PASSWORD:       ${{ secrets.AUTH0_SPA_PASSWORD }}
+        AUTH0_TEST_PERMISSION:    ${{ secrets.AUTH0_TEST_PERMISSION }}
 
     environment: Default
