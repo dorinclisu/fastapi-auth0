@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as file:
 
 setuptools.setup(
     name='fastapi-auth0',
-    version='0.1.4',
+    version='0.1.5',
     description='Easy auth0.com integration for FastAPI',
     long_description=readme,
     long_description_content_type='text/markdown',
