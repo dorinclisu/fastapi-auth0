@@ -3,8 +3,8 @@ Integrate FastAPI with https://auth0.com in a simple and elegant way.
 Get automatic Swagger UI integration for the implicit scheme (along others), which means that signing in using social providers is only a few clicks away with no additional code.
 
 # Installation
-- Latest version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/master.zip`
-- Locked version: `pip install https://github.com/dorinclisu/fastapi-auth0/archive/x.y.z.zip` (check release tags)
+- `pip install fastapi-auth0`
+- Latest beta: `pip install -i https://test.pypi.org/simple/ fastapi-auth0`
 
 # Requirements
 Reading auth0 docs is recommended in order to understand the following concepts:
