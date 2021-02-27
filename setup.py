@@ -7,6 +7,7 @@ setuptools.setup(
     author='Dorin Clisu',
     author_email='dorin.clisu@gmail.com',
     packages=setuptools.find_packages('src'),
+    package_dir={'': 'src'},
     license='GNU-GPL-V3',
     description='Easy auth0.com integration for FastAPI',
     python_requires='>=3.6',
