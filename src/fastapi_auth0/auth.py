@@ -77,7 +77,7 @@ class Auth0:
         self.scope_auto_error = scope_auto_error
         self.email_auto_error = email_auto_error
 
-        self.auth0_user_mode = auth0user_model
+        self.auth0_user_model = auth0user_model
 
         self.algorithms = ['RS256']
         self.jwks: Dict = requests.get(f'https://{domain}/.well-known/jwks.json').json()
@@ -163,7 +163,7 @@ class Auth0:
                 raise Auth0UnauthorizedError(detail='Token "scope" field must be a string')
 
         try:
-            user = self.auth0user_model(**payload)
+            user = self.auth0_user_model(**payload)
 
             if self.email_auto_error and not user.email:
                 raise Auth0UnauthorizedError(detail=f'Missing email claim (check auth0 rule "Add email to access token")')
