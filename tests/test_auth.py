@@ -1,12 +1,13 @@
 import base64
 import json
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 import pytest
 import requests
 from fastapi import FastAPI, Depends, Security
 from fastapi.testclient import TestClient
+from pydantic import Field
 
 #from fastapi_auth0 import Auth0, Auth0User, security_responses
 from src.fastapi_auth0 import Auth0, Auth0User, security_responses
@@ -29,9 +30,13 @@ auth0_spa_password = os.getenv('AUTH0_SPA_PASSWORD')
 
 auth0_test_permission = os.getenv('AUTH0_TEST_PERMISSION', '')
 
+###############################################################################
+class CustomAuth0User(Auth0User):
+    grant_type: Optional[str] = Field(None, alias='gty')
 
 ###############################################################################
 auth = Auth0(domain=auth0_domain, api_audience=auth0_api_audience)
+auth_custom = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auth0user_model=CustomAuth0User)
 app = FastAPI()
 
 @app.get('/public')
@@ -58,6 +63,9 @@ def get_also_secure_2():
 def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[auth0_test_permission])):
     return user
 
+@app.get('/secure-custom-user')
+def get_secure_custom_user(user: CustomAuth0User = Security(auth_custom.get_user)):
+    return user
 
 ###############################################################################
 client = TestClient(app)
@@ -132,6 +140,11 @@ def test_m2m_app():
     # M2M app is not subject to RBAC, so any permission given to it will also authorize the scope.
     resp = client.get('/secure-scoped', headers=get_bearer_header(access_token))
     assert resp.status_code == 200, resp.text
+
+    resp = client.get('/secure-custom-user', headers=get_bearer_header(access_token))
+    assert resp.status_code == 200, resp.text
+    user = CustomAuth0User(**resp.json())
+    assert user.grant_type in ['client-credentials', 'client_credentials']
 
 
 def test_spa_app_noscope():
