@@ -1,7 +1,7 @@
 import json
 import logging
 import requests
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Type
 
 from fastapi import HTTPException, Depends, Security, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
@@ -68,13 +68,16 @@ class OAuth2ImplicitBearer(OAuth2):
 
 class Auth0:
     def __init__(self, domain: str, api_audience: str, scopes: Dict[str, str]={},
-            auto_error: bool=True, scope_auto_error: bool=True, email_auto_error: bool=False):
+            auto_error: bool=True, scope_auto_error: bool=True, email_auto_error: bool=False,
+            auth0user_model: Type[Auth0User]=Auth0User):
         self.domain = domain
         self.audience = api_audience
 
         self.auto_error = auto_error
         self.scope_auto_error = scope_auto_error
         self.email_auto_error = email_auto_error
+
+        self.auth0_user_model = auth0user_model
 
         self.algorithms = ['RS256']
         self.jwks: Dict = requests.get(f'https://{domain}/.well-known/jwks.json').json()
@@ -160,7 +163,7 @@ class Auth0:
                 raise Auth0UnauthorizedError(detail='Token "scope" field must be a string')
 
         try:
-            user = Auth0User(**payload)
+            user = self.auth0_user_model(**payload)
 
             if self.email_auto_error and not user.email:
                 raise Auth0UnauthorizedError(detail=f'Missing email claim (check auth0 rule "Add email to access token")')
