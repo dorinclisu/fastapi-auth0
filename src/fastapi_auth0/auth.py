@@ -146,7 +146,10 @@ class Auth0:
 
         except Exception as e:
             logging.error(f'Handled exception decoding token: "{e}"')
-            raise Auth0UnauthenticatedError(detail='Error decoding token')
+            if self.auto_error:
+                raise Auth0UnauthenticatedError(detail='Error decoding token')
+            else:
+                return None
 
         if self.scope_auto_error:
             token_scope_str: str = payload.get('scope', '')
@@ -170,7 +173,8 @@ class Auth0:
 
             return user
 
-        except ValidationError:
+        except ValidationError as e:
+            logging.error(f'Handled exception parsing Auth0User: "{e}"')
             if self.auto_error:
                 raise Auth0UnauthorizedError(detail='Error parsing Auth0User')
             else:
