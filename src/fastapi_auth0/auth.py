@@ -2,6 +2,7 @@ import json
 import logging
 import requests
 from typing import Optional, Dict, List, Type
+import urllib.parse
 
 from fastapi import HTTPException, Depends, Security, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
@@ -82,13 +83,15 @@ class Auth0:
         self.algorithms = ['RS256']
         self.jwks: Dict = requests.get(f'https://{domain}/.well-known/jwks.json').json()
 
+        authorization_url_qs = urllib.parse.urlencode({"audience": api_audience})
+        authorization_url = f'https://{domain}/authorize?{authorization_url_qs}'
         self.implicit_scheme = OAuth2ImplicitBearer(
-            authorizationUrl=f'https://{domain}/authorize?audience={api_audience}',
+            authorizationUrl=authorization_url,
             scopes=scopes,
             scheme_name='Auth0ImplicitBearer')
         self.password_scheme = OAuth2PasswordBearer(tokenUrl=f'https://{domain}/oauth/token', scopes=scopes)
         self.authcode_scheme = OAuth2AuthorizationCodeBearer(
-            authorizationUrl=f'https://{domain}/authorize?audience={api_audience}',
+            authorizationUrl=authorization_url,
             tokenUrl=f'https://{domain}/oauth/token',
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
