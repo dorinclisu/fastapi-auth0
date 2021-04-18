@@ -17,11 +17,11 @@ from jose import jwt  # type: ignore
 auth0_rule_namespace: str = os.getenv('AUTH0_RULE_NAMESPACE', 'https://github.com/dorinclisu/fastapi-auth0')
 
 
-class Auth0UnauthenticatedError(HTTPException):
+class Auth0UnauthenticatedException(HTTPException):
     def __init__(self, **kwargs):
         super().__init__(401, **kwargs)
 
-class Auth0UnauthorizedError(HTTPException):
+class Auth0UnauthorizedException(HTTPException):
     def __init__(self, **kwargs):
         super().__init__(403, **kwargs)
 
@@ -132,26 +132,26 @@ class Auth0:
 
         except jwt.ExpiredSignatureError:
             if self.auto_error:
-                raise Auth0UnauthenticatedError(detail='Expired token')
+                raise Auth0UnauthenticatedException(detail='Expired token')
             else:
                 return None
 
         except jwt.JWTClaimsError:
             if self.auto_error:
-                raise Auth0UnauthenticatedError(detail='Invalid token claims (please check issuer and audience)')
+                raise Auth0UnauthenticatedException(detail='Invalid token claims (please check issuer and audience)')
             else:
                 return None
 
         except jwt.JWTError:
             if self.auto_error:
-                raise Auth0UnauthenticatedError(detail='Malformed token')
+                raise Auth0UnauthenticatedException(detail='Malformed token')
             else:
                 return None
 
         except Exception as e:
             logging.error(f'Handled exception decoding token: "{e}"')
             if self.auto_error:
-                raise Auth0UnauthenticatedError(detail='Error decoding token')
+                raise Auth0UnauthenticatedException(detail='Error decoding token')
             else:
                 return None
 
@@ -163,24 +163,24 @@ class Auth0:
 
                 for scope in security_scopes.scopes:
                     if scope not in token_scopes:
-                        raise Auth0UnauthorizedError(detail=f'Missing "{scope}" scope',
+                        raise Auth0UnauthorizedException(detail=f'Missing "{scope}" scope',
                             headers={'WWW-Authenticate': f'Bearer scope="{security_scopes.scope_str}"'})
             else:
                 # This is an unlikely case but handle it just to be safe (perhaps auth0 will change the scope format)
-                raise Auth0UnauthorizedError(detail='Token "scope" field must be a string')
+                raise Auth0UnauthorizedException(detail='Token "scope" field must be a string')
 
         try:
             user = self.auth0_user_model(**payload)
 
             if self.email_auto_error and not user.email:
-                raise Auth0UnauthorizedError(detail=f'Missing email claim (check auth0 rule "Add email to access token")')
+                raise Auth0UnauthorizedException(detail=f'Missing email claim (check auth0 rule "Add email to access token")')
 
             return user
 
         except ValidationError as e:
             logging.error(f'Handled exception parsing Auth0User: "{e}"')
             if self.auto_error:
-                raise Auth0UnauthorizedError(detail='Error parsing Auth0User')
+                raise Auth0UnauthorizedException(detail='Error parsing Auth0User')
             else:
                 return None
 
