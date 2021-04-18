@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import requests
 from typing import Optional, Dict, List, Type
 import urllib.parse
@@ -13,7 +14,7 @@ from jose import jwt  # type: ignore
 
 
 
-auth0_rule_namespace: str = 'https://github.com/dorinclisu/fastapi-auth0'
+auth0_rule_namespace: str = os.getenv('AUTH0_RULE_NAMESPACE', 'https://github.com/dorinclisu/fastapi-auth0')
 
 
 class Auth0UnauthenticatedError(HTTPException):
