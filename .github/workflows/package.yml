@@ -53,6 +53,7 @@ jobs:
     environment: Default
 
   publish:
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:

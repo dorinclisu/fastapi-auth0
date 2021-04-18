@@ -40,31 +40,31 @@ auth_custom = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auth0u
 app = FastAPI()
 
 @app.get('/public')
-def get_public():
+async def get_public():
     return {'message': 'Anonymous user'}
 
 @app.get('/also-public', dependencies=[Depends(auth.implicit_scheme)])
-def get_public2():
+async def get_public2():
     return {'message': 'Anonymous user (token is received from swagger ui but not verified)'}
 
 @app.get('/secure', dependencies=[Depends(auth.implicit_scheme)], responses=security_responses)
-def get_secure(user: Auth0User = Security(auth.get_user)):
+async def get_secure(user: Auth0User = Security(auth.get_user)):
     return user
 
 @app.get('/also-secure')
-def get_also_secure(user: Auth0User = Security(auth.get_user)):
+async def get_also_secure(user: Auth0User = Security(auth.get_user)):
     return user
 
 @app.get('/also-secure-2', dependencies=[Depends(auth.get_user)])
-def get_also_secure_2():
+async def get_also_secure_2():
     return {'message': 'I dont care who you are but I know you are authorized'}
 
 @app.get('/secure-scoped')
-def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[auth0_test_permission])):
+async def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[auth0_test_permission])):
     return user
 
 @app.get('/secure-custom-user')
-def get_secure_custom_user(user: CustomAuth0User = Security(auth_custom.get_user)):
+async def get_secure_custom_user(user: CustomAuth0User = Security(auth_custom.get_user)):
     return user
 
 ###############################################################################

@@ -4,7 +4,6 @@ Get automatic Swagger UI support for the implicit scheme (along others), which m
 
 # Installation
 - `pip install fastapi-auth0`
-- Latest beta: `pip install -i https://test.pypi.org/simple/ fastapi-auth0`
 
 # Requirements
 Reading auth0 docs is recommended in order to understand the following concepts:
@@ -21,7 +20,8 @@ The security is not affected in any way if we don't do this, but we need to if w
 
 ### Swagger UI login requirements
 In order to utilize the interactive docs for the implicit flow, the callback url must be registered on the auth0 dashboard. For swagger this url is `{SWAGGER_DOCS_URL}/oauth2-redirect`, so if you are running FastAPI on localhost:8000, that becomes `http://localhost:8000/docs/oauth2-redirect`. Add it to "Allowed Callback URLs" for the application which you intend to login with (the client_id you input for Auth0ImplicitBearer authorization).
-Unfortunately, it's not possible to logout and login with another user before the token expires. This is a limitation of Swagger UI as the logout button only clears the access token locally, but doesn't call any url.
+
+In order to logout and login with another user, it's necessary to manually call GET `https://{auth0_domain}/v2/logout`, becacause the Swagger UI logout button is not able to clear 3rd party session / cookies.
 
 # Example usage
 ```Python
@@ -44,9 +44,9 @@ def get_secure(user: Auth0User = Security(auth.get_user, scopes=['read:blabla'])
 
 Example user responses:
 ```Python
-id='Art2l2uCeCQk5zDVbZzNZmQkLJXLd9Uy@clients' permissions=['read:blabla'] email=None"}              # user is M2M app
-id='auth0|5fe72b8eb2ac50006f725451' permissions=['read:blabla'] email='some.user@outlook.com"}      # user signed up using auth0 database
-id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='other.user@gmail.com"}  # user signed up using google
+id='Art2l2uCeCQk5zDVbZzNZmQkLJXLd9Uy@clients' permissions=['read:blabla'] email=None"              # user is M2M app
+id='auth0|5fe72b8eb2ac50006f725451' permissions=['read:blabla'] email='some.user@outlook.com"      # user signed up using auth0 database
+id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='other.user@gmail.com"  # user signed up using google
 ```
 
 # Video tutorial

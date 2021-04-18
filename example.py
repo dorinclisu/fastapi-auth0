@@ -14,17 +14,17 @@ app = FastAPI()
 
 
 @app.get("/public")
-def get_public():
+async def get_public():
     return {"message": "Anonymous user"}
 
 @app.get("/secure", dependencies=[Depends(auth.implicit_scheme)])
-def get_secure(user: Auth0User = Security(auth.get_user)):
+async def get_secure(user: Auth0User = Security(auth.get_user)):
     return {"message": f"{user}"}
 
 @app.get("/secure/blabla", dependencies=[Depends(auth.implicit_scheme)])
-def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=["read:blabla"])):
+async def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=["read:blabla"])):
     return {"message": f"{user}"}
 
 @app.get("/secure/blabla2")
-def get_secure_scoped2(user: Auth0User = Security(auth.get_user, scopes=["read:blabla"])):
+async def get_secure_scoped2(user: Auth0User = Security(auth.get_user, scopes=["read:blabla"])):
     return {"message": f"{user}"}
