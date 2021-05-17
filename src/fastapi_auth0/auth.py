@@ -100,8 +100,14 @@ class Auth0:
 
     async def get_user(self,
         security_scopes: SecurityScopes,
-        creds: HTTPAuthorizationCredentials = Depends(Auth0HTTPBearer())
+        creds: HTTPAuthorizationCredentials = Depends(Auth0HTTPBearer(auto_error=False)),
     ) -> Optional[Auth0User]:
+
+        if creds is None:
+            if self.auto_error:
+                raise Auth0UnauthenticatedException(detail='Credentials missing')
+            else:
+                return None
 
         token = creds.credentials
         payload: Dict = {}
