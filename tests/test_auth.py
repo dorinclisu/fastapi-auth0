@@ -37,6 +37,7 @@ class CustomAuth0User(Auth0User):
 ###############################################################################
 auth = Auth0(domain=auth0_domain, api_audience=auth0_api_audience)
 auth_custom = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auth0user_model=CustomAuth0User)
+auth_guest = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auto_error=False)
 app = FastAPI()
 
 @app.get('/public')
@@ -66,6 +67,12 @@ async def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[au
 @app.get('/secure-custom-user')
 async def get_secure_custom_user(user: CustomAuth0User = Security(auth_custom.get_user)):
     return user
+
+@app.get('/guest')
+async def get_guest(user: Optional[Auth0User] = Security(auth_guest.get_user)):
+    if user:
+        return {'message': user.dict()}
+    return {'message': 'guest'}
 
 ###############################################################################
 client = TestClient(app)
@@ -111,6 +118,10 @@ def test_public():
     resp = client.get('/secure-scoped')
     assert resp.status_code == 403, resp.text  # should be 401, see https://github.com/tiangolo/fastapi/pull/2120
 
+    resp = client.get('/guest')
+    assert resp.status_code == 200, resp.text
+    assert resp.json()['message'] == 'guest', resp.json()
+
 
 def test_m2m_app():
     resp = requests.post(
@@ -145,6 +156,10 @@ def test_m2m_app():
     assert resp.status_code == 200, resp.text
     user = CustomAuth0User(**resp.json())
     assert user.grant_type in ['client-credentials', 'client_credentials']
+
+    resp = client.get('/guest', headers=get_bearer_header(access_token))
+    assert resp.status_code == 200, resp.text
+    assert resp.json()['message'] != 'guest', resp.json()
 
 
 def test_spa_app_noscope():
