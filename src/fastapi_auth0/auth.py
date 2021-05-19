@@ -100,12 +100,15 @@ class Auth0:
 
     async def get_user(self,
         security_scopes: SecurityScopes,
-        creds: HTTPAuthorizationCredentials = Depends(Auth0HTTPBearer(auto_error=False)),
+        creds: Optional[HTTPAuthorizationCredentials] = Depends(Auth0HTTPBearer(auto_error=False)),
     ) -> Optional[Auth0User]:
 
         if creds is None:
             if self.auto_error:
-                raise Auth0UnauthenticatedException(detail='Credentials missing')
+                # See HTTPBearer from FastAPI:
+                # latest - https://github.com/tiangolo/fastapi/blob/master/fastapi/security/http.py
+                # 0.65.1 - https://github.com/tiangolo/fastapi/blob/aece74982d7c9c1acac98e2c872c4cb885677fc7/fastapi/security/http.py
+                raise HTTPException(403, detail='Missing bearer token')  # must be 403 until solving https://github.com/tiangolo/fastapi/pull/2120
             else:
                 return None
 
