@@ -44,9 +44,9 @@ def get_secure(user: Auth0User = Security(auth.get_user, scopes=['read:blabla'])
 
 Example user responses:
 ```Python
-id='Art2l2uCeCQk5zDVbZzNZmQkLJXLd9Uy@clients' permissions=['read:blabla'] email=None"              # user is M2M app
-id='auth0|5fe72b8eb2ac50006f725451' permissions=['read:blabla'] email='some.user@outlook.com"      # user signed up using auth0 database
-id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='other.user@gmail.com"  # user signed up using google
+id='Art2l2uCeCQk5zDVbZzNZmQkLJXLd9Uy@clients' permissions=['read:blabla'] email=None               # user is M2M app
+id='auth0|5fe72b8eb2ac50006f725451' permissions=['read:blabla'] email='some.user@outlook.com'      # user signed up using auth0 database
+id='google-oauth2|115595596713285791346' permissions=['read:blabla'] email='other.user@gmail.com'  # user signed up using google
 ```
 
 # Video tutorial
