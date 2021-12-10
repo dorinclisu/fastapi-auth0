@@ -137,7 +137,7 @@ class Auth0:
                 )
             else:
                 if self.auto_error:
-                    raise jwt.JWTError
+                    raise Auth0UnauthenticatedException(detail='Invalid kid header (no matching public key)')
 
         except jwt.ExpiredSignatureError:
             if self.auto_error:
@@ -156,6 +156,9 @@ class Auth0:
                 raise Auth0UnauthenticatedException(detail='Malformed token')
             else:
                 return None
+
+        except Auth0UnauthenticatedException:
+            raise
 
         except Exception as e:
             logging.error(f'Handled exception decoding token: "{e}"')
