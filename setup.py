@@ -17,5 +17,5 @@ setuptools.setup(
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     python_requires='>=3.6',
-    install_requires=['fastapi>=0.60.0', 'python-jose>=3.2.0', 'requests']
+    install_requires=['fastapi>=0.60.0', 'python-jose>=3.2.0']
 )

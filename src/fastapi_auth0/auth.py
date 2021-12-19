@@ -1,9 +1,9 @@
 import json
 import logging
 import os
-import requests
-from typing import Optional, Dict, List, Type
+from typing import Optional, Dict, List, Type, TypedDict
 import urllib.parse
+import urllib.request
 
 from fastapi import HTTPException, Depends, Security, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
@@ -67,6 +67,17 @@ class OAuth2ImplicitBearer(OAuth2):
     #     logging.debug('Called OAuth2ImplicitBearer')
     #     return creds.credentials
 
+class JwksKeyDict(TypedDict):
+    kid: str
+    kty: str
+    use: str
+    n: str
+    e: str
+
+class JwksDict(TypedDict):
+    keys: List[JwksKeyDict]
+
+
 
 class Auth0:
     def __init__(self, domain: str, api_audience: str, scopes: Dict[str, str]={},
@@ -82,7 +93,8 @@ class Auth0:
         self.auth0_user_model = auth0user_model
 
         self.algorithms = ['RS256']
-        self.jwks: Dict = requests.get(f'https://{domain}/.well-known/jwks.json').json()
+        r = urllib.request.urlopen(f'https://{domain}/.well-known/jwks.json')
+        self.jwks: JwksDict = json.loads(r.read())
 
         authorization_url_qs = urllib.parse.urlencode({"audience": api_audience})
         authorization_url = f'https://{domain}/authorize?{authorization_url_qs}'
@@ -126,7 +138,7 @@ class Auth0:
                         'n': key['n'],
                         'e': key['e']
                     }
-                    #break  # TODO: do we still need to iterate all keys after we found a match?
+                    break
             if rsa_key:
                 payload = jwt.decode(
                     token,
