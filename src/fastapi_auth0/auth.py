@@ -1,16 +1,17 @@
 import json
 import logging
 import os
-from typing import Optional, Dict, List, Type, TypedDict
+from typing import Optional, Dict, List, Type
 import urllib.parse
 import urllib.request
 
+from jose import jwt  # type: ignore
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
 from fastapi.openapi.models import OAuthFlows
 from pydantic import BaseModel, Field, ValidationError
-from jose import jwt  # type: ignore
+from typing_extensions import TypedDict
 
 
 logger = logging.getLogger('fastapi_auth0')
