@@ -7,50 +7,41 @@ import pytest
 import requests
 from fastapi import FastAPI, Depends, Security
 from fastapi.testclient import TestClient
-from pydantic import Field
+from pydantic import Field, BaseSettings
 
 #from fastapi_auth0 import Auth0, Auth0User, security_responses
 from src.fastapi_auth0 import Auth0, Auth0User, security_responses
 
 
-auth0_domain = os.getenv('AUTH0_DOMAIN', '')  # Tenant domain
-auth0_api_audience = os.getenv('AUTH0_API_AUDIENCE', '')  # API that serves the applications (fastapi instance)
-auth0_api_audience_wrong = os.getenv('AUTH0_API_AUDIENCE_WRONG')
+class Env(BaseSettings):
+    auth0_domain:             str   # Tenant domain
+    auth0_api_audience:       str   # API identifier that serves the applications (fastapi instance)
+    auth0_api_audience_wrong: str
 
-auth0_expired_token = os.getenv('AUTH0_EXPIRED_TOKEN')
+    auth0_expired_token:      str
+    auth0_wrong_tenant_token: str
 
-auth0_m2m_client_id = os.getenv('AUTH0_M2M_CLIENT_ID')  # Machine-to-machine Application
-auth0_m2m_client_secret = os.getenv('AUTH0_M2M_CLIENT_SECRET')
+    auth0_m2m_client_id:      str   # Machine-to-machine Application
+    auth0_m2m_client_secret:  str
 
-auth0_spa_client_id = os.getenv('AUTH0_SPA_CLIENT_ID')  # Single Page Application
-auth0_spa_client_secret = os.getenv('AUTH0_SPA_CLIENT_SECRET')
+    auth0_spa_client_id:      str   # Single Page Application
+    auth0_spa_client_secret:  str
 
-auth0_spa_username = os.getenv('AUTH0_SPA_USERNAME')
-auth0_spa_password = os.getenv('AUTH0_SPA_PASSWORD')
+    auth0_spa_username:       str
+    auth0_spa_password:       str
 
-auth0_test_permission = os.getenv('AUTH0_TEST_PERMISSION', '')
+    auth0_test_permission:    str
 
-token_for_another_tennant = (
-    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InFIRkgxZmVLclg1TENaVXRTN2ZOVCJ9."
-    "eyJpc3MiOiJodHRwczovL2Rldi05enlpOWM5bS51cy5hdXRoMC5jb20vIiwic3ViIjoiZXJsWWZLQ"
-    "U1XemZBQmxUcjR6QjAzYnpiN3dkeHVobzBAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vcXVpY2tzdG"
-    "FydHMvYXBpIiwiaWF0IjoxNjM5MTMwMzkzLCJleHAiOjE2MzkyMTY3OTMsImF6cCI6ImVybFlmS0F"
-    "NV3pmQUJsVHI0ekIwM2J6Yjd3ZHh1aG8wIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.vv8Z"
-    "S1yLl5yTczjwCwW-6-vA3gjXSu5WZvTM4mcJGzfhplW_uzlJEncnDEc6-FO4yVoGxQ_6sSo_GfABk"
-    "hIP-L9iWd127KptML-PHWzeJAcI12yaCE6592CK_tK_tNhxRRMBGSv3cZaj0eXSlkQXFNMvS5J575"
-    "6gW6HYTe9FqBLMM2kJRW6T9GcehpBiymqLbDVNTffXhNGJHKBGA3VNAgSQp4rzzF7wljyxa9IJqot"
-    "owHKQxezwEpUBVDiurytRkHSZx9ShiWJKmd6ikxh6YJAjzJZkdxKgQQP6tgTB8m0P0O-CDt2j_w4Q"
-    "VtUrQe8tz2qQSzhJYEBOBGTwKf_Okw"
-)
+env = Env()
 
 ###############################################################################
 class CustomAuth0User(Auth0User):
     grant_type: Optional[str] = Field(None, alias='gty')
 
 ###############################################################################
-auth = Auth0(domain=auth0_domain, api_audience=auth0_api_audience)
-auth_custom = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auth0user_model=CustomAuth0User)
-auth_guest = Auth0(domain=auth0_domain, api_audience=auth0_api_audience, auto_error=False)
+auth        = Auth0(domain=env.auth0_domain, api_audience=env.auth0_api_audience)
+auth_custom = Auth0(domain=env.auth0_domain, api_audience=env.auth0_api_audience, auth0user_model=CustomAuth0User)
+auth_guest  = Auth0(domain=env.auth0_domain, api_audience=env.auth0_api_audience, auto_error=False)
 app = FastAPI()
 
 @app.get('/public')
@@ -74,7 +65,7 @@ async def get_also_secure_2():
     return {'message': 'I dont care who you are but I know you are authorized'}
 
 @app.get('/secure-scoped')
-async def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[auth0_test_permission])):
+async def get_secure_scoped(user: Auth0User = Security(auth.get_user, scopes=[env.auth0_test_permission])):
     return user
 
 @app.get('/secure-custom-user')
@@ -138,12 +129,12 @@ def test_public():
 
 def test_m2m_app():
     resp = requests.post(
-        f'https://{auth0_domain}/oauth/token',
+        f'https://{env.auth0_domain}/oauth/token',
         json={
         'grant_type': 'client_credentials',
-        'client_id': auth0_m2m_client_id,
-        'client_secret': auth0_m2m_client_secret,
-        'audience': auth0_api_audience,
+        'client_id': env.auth0_m2m_client_id,
+        'client_secret': env.auth0_m2m_client_secret,
+        'audience': env.auth0_api_audience,
     })
     assert resp.status_code == 200, resp.text
     access_token = resp.json()['access_token']
@@ -158,7 +149,7 @@ def test_m2m_app():
     assert resp2.status_code == 200, resp2.text
 
     user = Auth0User(**resp.json())
-    assert auth0_test_permission in user.permissions
+    assert env.auth0_test_permission in user.permissions
     assert user.email is None # auth0 cannot provide an email because the end user is a machine
 
     # M2M app is not subject to RBAC, so any permission given to it will also authorize the scope.
@@ -174,22 +165,22 @@ def test_m2m_app():
     assert resp.status_code == 200, resp.text
     assert resp.json()['message'] != 'guest', resp.json()
 
-    resp = client.get('/guest', headers=get_bearer_header(token_for_another_tennant))
+    resp = client.get('/guest', headers=get_bearer_header(env.auth0_wrong_tenant_token))
     assert resp.status_code == 200, resp.text
     assert resp.json()['message'] == 'guest', resp.json()
 
 
 def test_spa_app_noscope():
     resp = requests.post(
-        f'https://{auth0_domain}/oauth/token',
+        f'https://{env.auth0_domain}/oauth/token',
         headers={'content-type': 'application/x-www-form-urlencoded'},
         data={
         'grant_type': 'password',
-        'username': auth0_spa_username,
-        'password': auth0_spa_password,
-        'client_id': auth0_spa_client_id,
-        'client_secret': auth0_spa_client_secret,
-        'audience': auth0_api_audience,
+        'username': env.auth0_spa_username,
+        'password': env.auth0_spa_password,
+        'client_id': env.auth0_spa_client_id,
+        'client_secret': env.auth0_spa_client_secret,
+        'audience': env.auth0_api_audience,
         # the app is not explicitly requesting scope
     })
     assert resp.status_code == 200, resp.text
@@ -203,8 +194,8 @@ def test_spa_app_noscope():
     assert resp.status_code == 200, resp.text
 
     user = Auth0User(**resp.json())
-    assert auth0_test_permission in user.permissions
-    assert user.email == auth0_spa_username
+    assert env.auth0_test_permission in user.permissions
+    assert user.email == env.auth0_spa_username
 
     # The user has the permission, but the scope authorization must fail because
     # the SPA app did not request a scope on user's behalf.
@@ -215,16 +206,16 @@ def test_spa_app_noscope():
 
 def test_spa_app():
     resp = requests.post(
-        f'https://{auth0_domain}/oauth/token',
+        f'https://{env.auth0_domain}/oauth/token',
         headers={'content-type': 'application/x-www-form-urlencoded'},
         data={
         'grant_type': 'password',
-        'username': auth0_spa_username,
-        'password': auth0_spa_password,
-        'client_id': auth0_spa_client_id,
-        'client_secret': auth0_spa_client_secret,
-        'audience': auth0_api_audience,
-        'scope': auth0_test_permission
+        'username': env.auth0_spa_username,
+        'password': env.auth0_spa_password,
+        'client_id': env.auth0_spa_client_id,
+        'client_secret': env.auth0_spa_client_secret,
+        'audience': env.auth0_api_audience,
+        'scope': env.auth0_test_permission
     })
     assert resp.status_code == 200, resp.text
 
@@ -237,30 +228,30 @@ def test_spa_app():
     assert resp.status_code == 200, resp.text
 
     user = Auth0User(**resp.json())
-    assert auth0_test_permission in user.permissions
-    assert user.email == auth0_spa_username
+    assert env.auth0_test_permission in user.permissions
+    assert user.email == env.auth0_spa_username
 
     resp = client.get('/secure-scoped', headers=get_bearer_header(access_token))
     assert resp.status_code == 200, resp.text
 
 
 def test_token():
-    resp = client.get('/secure', headers=get_bearer_header(auth0_expired_token))
+    resp = client.get('/secure', headers=get_bearer_header(env.auth0_expired_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
     assert 'expired' in error_detail.lower(), error_detail
 
     resp = requests.post(
-        f'https://{auth0_domain}/oauth/token',
+        f'https://{env.auth0_domain}/oauth/token',
         headers={'content-type': 'application/x-www-form-urlencoded'},
         data={
         'grant_type': 'password',
-        'username': auth0_spa_username,
-        'password': auth0_spa_password,
-        'client_id': auth0_spa_client_id,
-        'client_secret': auth0_spa_client_secret,
-        'audience': auth0_api_audience_wrong,  # wrong audience
-        'scope': auth0_test_permission
+        'username': env.auth0_spa_username,
+        'password': env.auth0_spa_password,
+        'client_id': env.auth0_spa_client_id,
+        'client_secret': env.auth0_spa_client_secret,
+        'audience': env.auth0_api_audience_wrong,  # wrong audience
+        'scope': env.auth0_test_permission
     })
     assert resp.status_code == 200, resp.text
 
@@ -283,7 +274,7 @@ def test_token():
     error_detail = resp.json()['detail']
     assert 'malformed' in error_detail.lower(), error_detail
 
-    resp = client.get('/secure', headers=get_bearer_header(token_for_another_tennant))
+    resp = client.get('/secure', headers=get_bearer_header(env.auth0_wrong_tenant_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
     assert 'invalid kid header (no matching public key)' in error_detail.lower(), error_detail
