@@ -138,6 +138,8 @@ class Auth0:
             else:
                 if self.auto_error:
                     raise Auth0UnauthenticatedException(detail='Invalid kid header (no matching public key)')
+                else:
+                    return None
 
         except jwt.ExpiredSignatureError:
             if self.auto_error:

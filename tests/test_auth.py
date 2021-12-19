@@ -30,6 +30,19 @@ auth0_spa_password = os.getenv('AUTH0_SPA_PASSWORD')
 
 auth0_test_permission = os.getenv('AUTH0_TEST_PERMISSION', '')
 
+token_for_another_tennant = (
+    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InFIRkgxZmVLclg1TENaVXRTN2ZOVCJ9."
+    "eyJpc3MiOiJodHRwczovL2Rldi05enlpOWM5bS51cy5hdXRoMC5jb20vIiwic3ViIjoiZXJsWWZLQ"
+    "U1XemZBQmxUcjR6QjAzYnpiN3dkeHVobzBAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vcXVpY2tzdG"
+    "FydHMvYXBpIiwiaWF0IjoxNjM5MTMwMzkzLCJleHAiOjE2MzkyMTY3OTMsImF6cCI6ImVybFlmS0F"
+    "NV3pmQUJsVHI0ekIwM2J6Yjd3ZHh1aG8wIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.vv8Z"
+    "S1yLl5yTczjwCwW-6-vA3gjXSu5WZvTM4mcJGzfhplW_uzlJEncnDEc6-FO4yVoGxQ_6sSo_GfABk"
+    "hIP-L9iWd127KptML-PHWzeJAcI12yaCE6592CK_tK_tNhxRRMBGSv3cZaj0eXSlkQXFNMvS5J575"
+    "6gW6HYTe9FqBLMM2kJRW6T9GcehpBiymqLbDVNTffXhNGJHKBGA3VNAgSQp4rzzF7wljyxa9IJqot"
+    "owHKQxezwEpUBVDiurytRkHSZx9ShiWJKmd6ikxh6YJAjzJZkdxKgQQP6tgTB8m0P0O-CDt2j_w4Q"
+    "VtUrQe8tz2qQSzhJYEBOBGTwKf_Okw"
+)
+
 ###############################################################################
 class CustomAuth0User(Auth0User):
     grant_type: Optional[str] = Field(None, alias='gty')
@@ -161,6 +174,10 @@ def test_m2m_app():
     assert resp.status_code == 200, resp.text
     assert resp.json()['message'] != 'guest', resp.json()
 
+    resp = client.get('/guest', headers=get_bearer_header(token_for_another_tennant))
+    assert resp.status_code == 200, resp.text
+    assert resp.json()['message'] == 'guest', resp.json()
+
 
 def test_spa_app_noscope():
     resp = requests.post(
@@ -266,18 +283,6 @@ def test_token():
     error_detail = resp.json()['detail']
     assert 'malformed' in error_detail.lower(), error_detail
 
-    token_for_another_tennant = (
-        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InFIRkgxZmVLclg1TENaVXRTN2ZOVCJ9."
-        "eyJpc3MiOiJodHRwczovL2Rldi05enlpOWM5bS51cy5hdXRoMC5jb20vIiwic3ViIjoiZXJsWWZLQ"
-        "U1XemZBQmxUcjR6QjAzYnpiN3dkeHVobzBAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vcXVpY2tzdG"
-        "FydHMvYXBpIiwiaWF0IjoxNjM5MTMwMzkzLCJleHAiOjE2MzkyMTY3OTMsImF6cCI6ImVybFlmS0F"
-        "NV3pmQUJsVHI0ekIwM2J6Yjd3ZHh1aG8wIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.vv8Z"
-        "S1yLl5yTczjwCwW-6-vA3gjXSu5WZvTM4mcJGzfhplW_uzlJEncnDEc6-FO4yVoGxQ_6sSo_GfABk"
-        "hIP-L9iWd127KptML-PHWzeJAcI12yaCE6592CK_tK_tNhxRRMBGSv3cZaj0eXSlkQXFNMvS5J575"
-        "6gW6HYTe9FqBLMM2kJRW6T9GcehpBiymqLbDVNTffXhNGJHKBGA3VNAgSQp4rzzF7wljyxa9IJqot"
-        "owHKQxezwEpUBVDiurytRkHSZx9ShiWJKmd6ikxh6YJAjzJZkdxKgQQP6tgTB8m0P0O-CDt2j_w4Q"
-        "VtUrQe8tz2qQSzhJYEBOBGTwKf_Okw"
-    )
     resp = client.get('/secure', headers=get_bearer_header(token_for_another_tennant))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
