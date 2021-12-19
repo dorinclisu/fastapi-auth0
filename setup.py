@@ -12,7 +12,6 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/dorinclisu/fastapi-auth0',
     author='Dorin Clisu',
-    author_email='gmail dorin . clisu',
     license='GNU-GPL-V3',
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
