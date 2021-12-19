@@ -277,4 +277,4 @@ def test_token():
     resp = client.get('/secure', headers=get_bearer_header(env.auth0_wrong_tenant_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
-    assert 'invalid kid header (no matching public key)' in error_detail.lower(), error_detail
+    assert 'kid' in error_detail and 'tenant' in error_detail and 'rotated' in error_detail, error_detail
