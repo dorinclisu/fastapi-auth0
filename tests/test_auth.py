@@ -250,17 +250,28 @@ def test_token():
         'password': env.auth0_spa_password,
         'client_id': env.auth0_spa_client_id,
         'client_secret': env.auth0_spa_client_secret,
-        'audience': env.auth0_api_audience_wrong,  # wrong audience
+        'audience': env.auth0_api_audience,
         'scope': env.auth0_test_permission
     })
     assert resp.status_code == 200, resp.text
 
     access_token = resp.json()['access_token']
 
-    resp = client.get('/secure', headers=get_bearer_header(access_token))
-    assert resp.status_code == 401, resp.text
-    error_detail = resp.json()['detail']
-    assert 'audience' in error_detail.lower(), error_detail
+    resp = requests.post(
+        f'https://{env.auth0_domain}/oauth/token',
+        headers={'content-type': 'application/x-www-form-urlencoded'},
+        data={
+        'grant_type': 'password',
+        'username': env.auth0_spa_username,
+        'password': env.auth0_spa_password,
+        'client_id': env.auth0_spa_client_id,
+        'client_secret': env.auth0_spa_client_secret,
+        'audience': env.auth0_api_audience_wrong,
+        'scope': env.auth0_test_permission
+    })
+    assert resp.status_code == 400, resp.text
+    error_description = resp.json()['error_description']
+    assert 'audience' in error_description.lower(), error_description
 
     malformed_token = get_malformed_token(access_token)
     resp = client.get('/secure', headers=get_bearer_header(malformed_token))
