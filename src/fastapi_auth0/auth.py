@@ -133,7 +133,7 @@ class Auth0:
             rsa_key = {}
             for key in self.jwks['keys']:
                 if "kid" not in unverified_header:
-                    msg = 'kid header not provided.'
+                    msg = 'Malformed token'
                     if self.auto_error:
                         raise Auth0UnauthenticatedException(detail=msg)
                     else:
