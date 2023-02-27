@@ -135,7 +135,7 @@ class Auth0:
                 if "kid" not in unverified_header:
                     msg = 'kid header not provided.'
                     if self.auto_error:
-                        raise Auth0UnauthorizedException(detail=msg)
+                        raise Auth0UnauthenticatedException(detail=msg)
                     else:
                         logger.warning(msg)
                         return None
