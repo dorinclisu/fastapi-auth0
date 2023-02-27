@@ -97,6 +97,20 @@ def get_malformed_token(token: str) -> str:
 
     return token.replace(payload_encoded, bad_payload_encoded)
 
+def get_missing_kid_token(token: str) -> str:
+    payload_encoded = token.split('.')[1]
+    payload_str = base64.b64decode(payload_encoded + '=' * (4 - len(payload_encoded) % 4)).decode()
+    payload = json.loads(payload_str)
+
+    payload.pop("kid")
+    assert "kid" not in payload
+    bad_payload_str = json.dumps(payload)
+    bad_payload_encoded = base64.b64encode(bad_payload_str.encode()).decode().replace('=', '')
+
+    return token.replace(payload_encoded, bad_payload_encoded)
+    
+
+
 
 def get_invalid_token(token: str) -> str:
     header = token.split('.')[0]
@@ -278,3 +292,9 @@ def test_token():
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
     assert 'kid' in error_detail and 'tenant' in error_detail and 'rotated' in error_detail, error_detail
+
+    invalid_token = get_missing_kid_token(access_token)
+    resp = client.get('/secure', headers=get_bearer_header(invalid_token))
+    assert resp.status_code == 401, resp.text
+    error_detail = resp.json()['detail']
+    assert 'kid header not provided.' in error_detail.lower(), error_detail
