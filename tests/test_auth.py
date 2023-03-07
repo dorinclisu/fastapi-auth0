@@ -295,4 +295,4 @@ def test_token():
     resp = client.get('/secure', headers=get_bearer_header(invalid_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
-    assert 'malformed' in error_detail.lower(), error_detail
+    assert 'malformed' in error_detail.lower() and 'header' in error_detail.lower(), error_detail

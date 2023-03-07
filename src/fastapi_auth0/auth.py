@@ -130,15 +130,17 @@ class Auth0:
         payload: Dict = {}
         try:
             unverified_header = jwt.get_unverified_header(token)
+
+            if 'kid' not in unverified_header:
+                msg = 'Malformed token header'
+                if self.auto_error:
+                    raise Auth0UnauthenticatedException(detail=msg)
+                else:
+                    logger.warning(msg)
+                    return None
+
             rsa_key = {}
             for key in self.jwks['keys']:
-                if "kid" not in unverified_header:
-                    msg = 'Malformed token'
-                    if self.auto_error:
-                        raise Auth0UnauthenticatedException(detail=msg)
-                    else:
-                        logger.warning(msg)
-                        return None
                 if key['kid'] == unverified_header['kid']:
                     rsa_key = {
                         'kty': key['kty'],
