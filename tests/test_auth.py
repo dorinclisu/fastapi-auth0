@@ -97,19 +97,17 @@ def get_malformed_token(token: str) -> str:
 
     return token.replace(payload_encoded, bad_payload_encoded)
 
+
 def get_missing_kid_token(token: str) -> str:
-    payload_encoded = token.split('.')[1]
-    payload_str = base64.b64decode(payload_encoded + '=' * (4 - len(payload_encoded) % 4)).decode()
-    payload = json.loads(payload_str)
+    header_encoded = token.split('.')[0]
+    header_str = base64.b64decode(header_encoded + '=' * (4 - len(header_encoded) % 4)).decode()
+    header = json.loads(header_str)
 
-    payload.pop("kid")
-    assert "kid" not in payload
-    bad_payload_str = json.dumps(payload)
-    bad_payload_encoded = base64.b64encode(bad_payload_str.encode()).decode().replace('=', '')
+    header.pop("kid")
+    bad_header_str = json.dumps(header)
+    bad_header_encoded = base64.b64encode(bad_header_str.encode()).decode().replace('=', '')
 
-    return token.replace(payload_encoded, bad_payload_encoded)
-    
-
+    return token.replace(header_encoded, bad_header_encoded)
 
 
 def get_invalid_token(token: str) -> str:
