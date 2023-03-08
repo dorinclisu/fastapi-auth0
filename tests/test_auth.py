@@ -278,13 +278,13 @@ def test_token():
     resp = client.get('/secure', headers=get_bearer_header(malformed_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
-    assert 'malformed' in error_detail.lower(), error_detail
+    assert 'malformed' in error_detail.lower() and 'header' not in error_detail.lower(), error_detail
 
     invalid_token = get_invalid_token(access_token)
     resp = client.get('/secure', headers=get_bearer_header(invalid_token))
     assert resp.status_code == 401, resp.text
     error_detail = resp.json()['detail']
-    assert 'malformed' in error_detail.lower(), error_detail
+    assert 'malformed' in error_detail.lower() and 'header' not in error_detail.lower(), error_detail
 
     resp = client.get('/secure', headers=get_bearer_header(env.auth0_wrong_tenant_token))
     assert resp.status_code == 401, resp.text
