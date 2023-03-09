@@ -32,7 +32,7 @@ class Env(BaseSettings):
 
     auth0_test_permission:    str
 
-env = Env()
+env = Env()  # type: ignore [call-arg]
 
 ###############################################################################
 class CustomAuth0User(Auth0User):

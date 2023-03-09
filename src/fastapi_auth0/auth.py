@@ -9,7 +9,7 @@ from jose import jwt  # type: ignore
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
-from fastapi.openapi.models import OAuthFlows
+from fastapi.openapi.models import OAuthFlows, OAuthFlowImplicit
 from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import TypedDict
 
@@ -40,7 +40,7 @@ security_responses:       Dict = {**unauthenticated_response, **unauthorized_res
 class Auth0User(BaseModel):
     id:                          str = Field(..., alias='sub')
     permissions: Optional[List[str]]
-    email:             Optional[str] = Field(None, alias=f'{auth0_rule_namespace}/email')
+    email:             Optional[str] = Field(None, alias=f'{auth0_rule_namespace}/email')  # type: ignore [literal-required]
 
 
 class Auth0HTTPBearer(HTTPBearer):
@@ -53,7 +53,7 @@ class OAuth2ImplicitBearer(OAuth2):
             scopes: Dict[str, str]={},
             scheme_name: Optional[str]=None,
             auto_error: bool=True):
-        flows = OAuthFlows(implicit={'authorizationUrl': authorizationUrl, 'scopes': scopes})
+        flows = OAuthFlows(implicit=OAuthFlowImplicit(authorizationUrl=authorizationUrl, scopes=scopes))
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
