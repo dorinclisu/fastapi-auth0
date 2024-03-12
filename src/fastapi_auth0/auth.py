@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 
 import jwt
+from jwt import PyJWKClient
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
@@ -90,8 +91,6 @@ class Auth0:
         self.auth0_user_model = auth0user_model
 
         self.algorithms = ['RS256']
-        r = urllib.request.urlopen(f'https://{domain}/.well-known/jwks.json')
-        self.jwks: JwksDict = json.loads(r.read())
 
         authorization_url_qs = urllib.parse.urlencode({'audience': api_audience})
         authorization_url = f'https://{domain}/authorize?{authorization_url_qs}'
@@ -106,7 +105,8 @@ class Auth0:
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
         self.options = options or {}
-
+        url = f'https://{self.domain}/.well-known/jwks.json'
+        self.jwks_client = PyJWKClient(url)
 
     async def get_user(self,
         security_scopes: SecurityScopes,
@@ -141,31 +141,20 @@ class Auth0:
                 else:
                     logger.warning(msg)
                     return None
-
-            rsa_key = {}
-            for key in self.jwks['keys']:
-                if key['kid'] == unverified_header['kid']:
-                    rsa_key = {
-                        'kty': key['kty'],
-                        'kid': key['kid'],
-                        'use': key['use'],
-                        'n': key['n'],
-                        'e': key['e']
-                    }
-                    break
-            if rsa_key:
-                leeway = self.options.pop("leeway", None)
+            try:
+                signing_key = self.jwks_client.get_signing_key_from_jwt(token)
+                leeway = self.options.pop("leeway", 0)
                 payload = jwt.decode(
                     token,
-                    rsa_key,
+                    signing_key.key,
                     algorithms=self.algorithms,
                     audience=self.audience,
                     issuer=f'https://{self.domain}/',
                     leeway=leeway,
                     options=self.options,
                 )
-            else:
-                msg = 'Invalid kid header (wrong tenant or rotated public key)'
+            except jwt.PyJWKClientError as e:
+                msg = str(e)
                 if self.auto_error:
                     raise Auth0UnauthenticatedException(detail=msg)
                 else:
