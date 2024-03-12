@@ -177,8 +177,8 @@ class Auth0:
                 logger.warning(msg)
                 return None
 
-        except jwt.PyJWTError:
-            msg = 'Malformed token'
+        except jwt.PyJWTError as e:
+            msg = str(e)
             if self.auto_error:
                 raise Auth0UnauthenticatedException(detail=msg)
             else:
