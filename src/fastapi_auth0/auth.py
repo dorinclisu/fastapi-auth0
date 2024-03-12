@@ -75,9 +75,11 @@ class JwksDict(TypedDict):
 
 
 class Auth0:
-    def __init__(self, domain: str, api_audience: str, scopes: dict[str, str] | None = None,
+    def __init__(self, domain: str, api_audience: str, scopes: Dict[str, str]={},
             auto_error: bool=True, scope_auto_error: bool=True, email_auto_error: bool=False,
-            auth0user_model: Type[Auth0User]=Auth0User, options: dict[str, Any] | None = None):
+            auth0user_model: Type[Auth0User]=Auth0User,
+            options: dict[str, Any] | None = None,
+        ):
         self.domain = domain
         self.audience = api_audience
 
