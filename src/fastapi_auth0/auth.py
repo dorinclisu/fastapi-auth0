@@ -50,7 +50,7 @@ class Auth0HTTPBearer(HTTPBearer):
 class OAuth2ImplicitBearer(OAuth2):
     def __init__(self,
             authorizationUrl: str,
-            scopes: Dict[str, str] | None = None,
+            scopes: Dict[str, str]={},
             scheme_name: Optional[str]=None,
             auto_error: bool=True):
         flows = OAuthFlows(implicit=OAuthFlowImplicit(authorizationUrl=authorizationUrl, scopes=scopes))
