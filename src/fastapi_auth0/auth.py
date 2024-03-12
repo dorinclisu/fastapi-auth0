@@ -1,11 +1,11 @@
 import json
 import logging
 import os
-from typing import Optional, Dict, List, Type
+from typing import Any, Optional, Dict, List, Type
 import urllib.parse
 import urllib.request
 
-from jose import jwt  # type: ignore
+import jwt
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
@@ -50,7 +50,7 @@ class Auth0HTTPBearer(HTTPBearer):
 class OAuth2ImplicitBearer(OAuth2):
     def __init__(self,
             authorizationUrl: str,
-            scopes: Dict[str, str]={},
+            scopes: Dict[str, str] | None = None,
             scheme_name: Optional[str]=None,
             auto_error: bool=True):
         flows = OAuthFlows(implicit=OAuthFlowImplicit(authorizationUrl=authorizationUrl, scopes=scopes))
@@ -75,9 +75,9 @@ class JwksDict(TypedDict):
 
 
 class Auth0:
-    def __init__(self, domain: str, api_audience: str, scopes: Dict[str, str]={},
+    def __init__(self, domain: str, api_audience: str, scopes: dict[str, str] | None = None,
             auto_error: bool=True, scope_auto_error: bool=True, email_auto_error: bool=False,
-            auth0user_model: Type[Auth0User]=Auth0User):
+            auth0user_model: Type[Auth0User]=Auth0User, options: dict[str, Any] | None = None):
         self.domain = domain
         self.audience = api_audience
 
@@ -103,6 +103,7 @@ class Auth0:
             tokenUrl=f'https://{domain}/oauth/token',
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
+        self.options = options or {}
 
 
     async def get_user(self,
@@ -151,12 +152,15 @@ class Auth0:
                     }
                     break
             if rsa_key:
+                leeway = self.options.pop("leeway", None)
                 payload = jwt.decode(
                     token,
                     rsa_key,
                     algorithms=self.algorithms,
                     audience=self.audience,
-                    issuer=f'https://{self.domain}/'
+                    issuer=f'https://{self.domain}/',
+                    leeway=leeway,
+                    options=self.options,
                 )
             else:
                 msg = 'Invalid kid header (wrong tenant or rotated public key)'
@@ -174,7 +178,7 @@ class Auth0:
                 logger.warning(msg)
                 return None
 
-        except jwt.JWTClaimsError:
+        except (jwt.InvalidAudienceError, jwt.InvalidIssuerError):
             msg = 'Invalid token claims (wrong issuer or audience)'
             if self.auto_error:
                 raise Auth0UnauthenticatedException(detail=msg)
@@ -182,7 +186,7 @@ class Auth0:
                 logger.warning(msg)
                 return None
 
-        except jwt.JWTError:
+        except jwt.PyJWTError:
             msg = 'Malformed token'
             if self.auto_error:
                 raise Auth0UnauthenticatedException(detail=msg)
