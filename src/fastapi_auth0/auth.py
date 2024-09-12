@@ -11,7 +11,6 @@ from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCreden
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
 from fastapi.openapi.models import OAuthFlows, OAuthFlowImplicit
 from pydantic import BaseModel, Field, ValidationError
-from typing_extensions import TypedDict
 
 
 logger = logging.getLogger('fastapi_auth0')
@@ -60,18 +59,6 @@ class OAuth2ImplicitBearer(OAuth2):
         # Overwrite parent call to prevent useless overhead, the actual auth is done in Auth0.get_user
         # This scheme is just for Swagger UI
         return None
-
-
-class JwksKeyDict(TypedDict):
-    kid: str
-    kty: str
-    use: str
-    n: str
-    e: str
-
-class JwksDict(TypedDict):
-    keys: List[JwksKeyDict]
-
 
 
 class Auth0:
