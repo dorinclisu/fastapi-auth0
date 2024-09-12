@@ -17,5 +17,5 @@ setuptools.setup(
     package_dir={'': 'src'},
     package_data={'': ['py.typed']},
     python_requires='>=3.7',
-    install_requires=['fastapi>=0.60.0', 'python-jose>=3.2.0']
+    install_requires=['fastapi>=0.60.0', 'PyJWT>=2.8.0']
 )
