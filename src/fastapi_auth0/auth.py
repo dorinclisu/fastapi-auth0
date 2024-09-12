@@ -5,7 +5,6 @@ import urllib.parse
 import urllib.request
 
 import jwt
-from jwt import PyJWKClient
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2, OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer, OpenIdConnect
@@ -89,7 +88,7 @@ class Auth0:
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
         self.options = options
-        self.jwks_client = PyJWKClient(f"https://{self.domain}/.well-known/jwks.json")
+        self.jwks_client = jwt.PyJWKClient(f"https://{self.domain}/.well-known/jwks.json")
 
 
     async def get_user(self,
