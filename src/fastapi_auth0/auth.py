@@ -14,8 +14,6 @@ from pydantic import BaseModel, Field, ValidationError
 
 logger = logging.getLogger('fastapi_auth0')
 
-auth0_rule_namespace: str = os.getenv('AUTH0_RULE_NAMESPACE', 'https://github.com/dorinclisu/fastapi-auth0')
-
 
 class Auth0UnauthenticatedException(HTTPException):
     def __init__(self, detail: str, **kwargs):
@@ -38,7 +36,7 @@ security_responses:       Dict = {**unauthenticated_response, **unauthorized_res
 class Auth0User(BaseModel):
     id:                          str = Field(..., alias='sub')
     permissions: Optional[List[str]] = None
-    email:             Optional[str] = Field(None, alias=f'{auth0_rule_namespace}/email')  # type: ignore [literal-required]
+    email:             Optional[str] = None
 
 
 class Auth0HTTPBearer(HTTPBearer):
