@@ -87,7 +87,7 @@ class Auth0:
             tokenUrl=f'https://{domain}/oauth/token',
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
-        self.options = options or {}
+        self.options = options or dict()
         self.options.update({"require": ["exp", "iat", "sub"]})
         self.jwks_client = jwt.PyJWKClient(f"https://{self.domain}/.well-known/jwks.json")
 
