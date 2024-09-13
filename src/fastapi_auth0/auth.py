@@ -88,6 +88,12 @@ class Auth0:
             scopes=scopes)
         self.oidc_scheme = OpenIdConnect(openIdConnectUrl=f'https://{domain}/.well-known/openid-configuration')
         self.options = options or dict()
+        self.options.setdefault("verify_signature", True)
+        self.options.setdefault("verify_aud", True)
+        self.options.setdefault("verify_iss", True)
+        self.options.setdefault("verify_exp", True)
+        self.options.setdefault("verify_iat", True)
+        self.options.setdefault("require", ["iss", "sub", "aud", "iat", "exp"])
         self.jwks_client = jwt.PyJWKClient(f"https://{self.domain}/.well-known/jwks.json")
 
 
@@ -129,7 +135,6 @@ class Auth0:
                 signing_key = self.jwks_client.get_signing_key_from_jwt(token)
                 options = self.options.copy()
                 leeway = options.pop("leeway", 0)
-                options.setdefault("require", ["iss", "sub", "aud", "iat", "exp"])
                 payload = jwt.decode(
                     token,
                     signing_key.key,
